@@ -9,8 +9,12 @@ import * as p5 from "p5";
 [] Try open large images / with diffrent sizes
 [] Open files from input
 [] Reassign variables of image after loading
-[] Change color of picked pixels
-[] Save edited image 
+[] Detect all pixels with similar color
+[] Change color of picked pixels and display it
+[] Change other pixels' colors proportionaly to inversion of absolute value of diffrence between picked color and new color
+[] Change proportion with slider 
+[] Create slider of strength of mixing old image with new colors
+[] Save edited image (download to PC)
 [] * Create Drag and drop option 
 */
 
