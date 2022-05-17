@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as p5 from "p5";
 
 /*
@@ -7,8 +7,8 @@ import * as p5 from "p5";
 
 [] Debounced color picker
 [] Try open large images / with diffrent sizes
-[] Open files from input
-[] Reassign variables of image after loading
+[+] Open files from input
+[+] Reassign variables of image after loading
 [] Detect all pixels with similar color
 [] Change color of picked pixels and display it
 [] Change other pixels' colors proportionaly to inversion of absolute value of diffrence between picked color and new color
@@ -23,6 +23,12 @@ export default function Canvas() {
   const [myP5, setMyP5] = useState(null);
   const [selectedColorStyle, setSelectedColorStyle] = useState("rgb(0, 0, 0)"); // For selected pixel color div
 
+  //State for new image loaded by user from input
+  const [newImage, setNewImage] = useState(null);
+
+  //Ref for hidden input form
+  const inputFile = useRef(null);
+
   let Sketch = (p) => {
     let image = null;
     let selectedColor = "rgb(0, 0, 0)";
@@ -32,11 +38,15 @@ export default function Canvas() {
 
     p.preload = () => {
       console.log("Preload, loading image...");
-      image = p.loadImage("./test2.png");
-      image.loadPixels();
+      image = p.loadImage(newImage || "./test2.png", () => {
+        // console.log(image);
+      });
+      // console.log(image);
+      // image.loadPixels();
     };
 
     p.setup = () => {
+      console.log("Setup...", image);
       dimension = p.min(p.windowWidth / 1.5, p.windowHeight / 1.5);
       p.frameRate(60);
       //p.windowWidth * 0.85, p.windowHeight * 1.0
@@ -48,11 +58,11 @@ export default function Canvas() {
     };
 
     p.draw = () => {
-      //p.translate(p.width / 2, p.height / 2); // Center the canvas so that 0,0 is the center
       p.background("rgb(100,100,100)");
 
       if (image) {
         p.image(image, 0, 0, p.width, (image.height * p.width) / image.width);
+        //Assign sizes of original image
         size = {
           width: parseInt(p.width),
           height: parseInt((image.height * p.width) / image.width),
@@ -98,6 +108,33 @@ export default function Canvas() {
     setMyP5(new p5(Sketch, myRef.current));
   }, []);
 
+  const onFileInputClick = () => {
+    inputFile.current.click();
+  };
+
+  const onChangeImageFile = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    console.log(e.target.files[0]);
+    readNewImage(e.target.files[0]);
+  };
+
+  const readNewImage = (file) => {
+    let reader = new FileReader();
+    reader.onload = function (ev) {
+      setNewImage(ev.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  useEffect(() => {
+    if (myP5 && newImage) {
+      myP5.remove();
+      setMyP5(new p5(Sketch, myRef.current));
+    }
+    // console.log("newimage:", newImage);
+  }, [newImage]);
+
   // useLayoutEffect(() => {
   //   return () => {
   //     myP5.remove();
@@ -105,7 +142,16 @@ export default function Canvas() {
   // }, []);
 
   return (
-    <div>
+    <div className="app-div">
+      <input
+        type="file"
+        id="image-file-input"
+        ref={inputFile}
+        style={{ display: "none" }}
+        onChange={onChangeImageFile.bind(this)}
+      />
+      <button onClick={onFileInputClick}>Open file upload window</button>
+      <br></br>
       <input
         type="color"
         id="head"
