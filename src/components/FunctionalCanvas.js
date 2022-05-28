@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as p5 from "p5";
+import { SketchPicker } from "react-color";
 
 /*
         TODO
@@ -23,10 +24,20 @@ import * as p5 from "p5";
 export default function Canvas() {
   let myRef = React.createRef();
   const [myP5, setMyP5] = useState(null);
+  const [proportionFactor, setProportionFactor] = useState(50);
+  const [powerChange, setPowerChange] = useState(50);
   const [selectedColorStyle, setSelectedColorStyle] = useState("rgb(0, 0, 0)"); // For selected pixel color div
 
   //State for new image loaded by user from input
   const [newImage, setNewImage] = useState(null);
+
+  const changeProportionFactor = (e) => {
+    setProportionFactor(e.target.value);
+  };
+
+  const changePowerChange = (e) => {
+    setPowerChange(e.target.value);
+  };
 
   //Ref for hidden input form
   const inputFile = useRef(null);
@@ -47,7 +58,7 @@ export default function Canvas() {
     p.preload = () => {
       console.log("Preload, loading image...");
       //Loading image before setup function
-      image = p.loadImage(newImage || "./test2.png", () => {
+      image = p.loadImage(newImage || "./test.jpg", () => {
         // console.log(image);
       });
       // image.loadPixels();
@@ -63,6 +74,7 @@ export default function Canvas() {
       //p.windowWidth * 0.85, p.windowHeight * 1.0
       //Create Canvas
       canvas = p.createCanvas(dimension, dimension);
+      //canvas = p.createCanvas(image.width, image.height);
       //Center canvas in window
       let x = p5.windowWidth - p5.width;
       let y = p5.windowHeight - p5.height;
@@ -164,48 +176,66 @@ export default function Canvas() {
     // console.log("newimage:", newImage);
   }, [newImage]);
 
-  // useLayoutEffect(() => {
-  //   return () => {
-  //     myP5.remove();
-  //   };
-  // }, []);
+  useEffect(() => {
+    //TODO: Change pixels based on those factors
+  }, [powerChange, proportionFactor]);
 
   return (
-    <div className="app-div">
-      <input
-        type="file"
-        id="image-file-input"
-        ref={inputFile}
-        style={{ display: "none" }}
-        onChange={onChangeImageFile.bind(this)}
-      />
-      <button onClick={onFileInputClick}>Open file upload window</button>
-      <br></br>
-      <input
-        type="color"
-        id="head"
-        name="head"
-        onChange={(e) => {
-          console.log("change", e.target.value);
-        }}
-      ></input>
-      <div
-        className="selected-color"
-        style={{
-          backgroundColor: selectedColorStyle,
-          width: "100px",
-          height: "100px",
-        }}
-      ></div>
-      {/* Real canvas div */}
-      <div
-        className="canvas-div"
-        style={{
-          display: "flex",
-          justifyContent: "center",
-        }}
-        ref={myRef}
-      />
+    <div className="container app">
+      <div className="row h-100 picker">
+        <div className="col-12 col-lg-3 picker__column">
+          <SketchPicker
+            color={selectedColorStyle}
+            onChangeComplete={setSelectedColorStyle}
+          />
+          <div className="picker__sliders">
+            <label htmlFor="proportionFactor" className="form-label">
+              Proportionality factor
+            </label>
+            <input
+              type="range"
+              className="form-range"
+              id="proportionFactor"
+              value={proportionFactor}
+              onChange={changeProportionFactor}
+            />
+            <label htmlFor="changePower" className="form-label">
+              Power of change
+            </label>
+            <input
+              type="range"
+              className="form-range"
+              id="changePower"
+              value={powerChange}
+              onChange={changePowerChange}
+            />
+          </div>
+          <input
+            type="file"
+            id="image-file-input"
+            ref={inputFile}
+            style={{ display: "none" }}
+            onChange={onChangeImageFile.bind(this)}
+          />
+          <button
+            className="btn btn-info text-light"
+            onClick={onFileInputClick}
+          >
+            Upload file
+          </button>
+        </div>
+        <div className="col-12 col-lg-9 picker__column d-flex align-items-center">
+          {/* Real canvas div */}
+          <div
+            className="canvas-div"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+            ref={myRef}
+          />
+        </div>
+      </div>
     </div>
   );
 }
