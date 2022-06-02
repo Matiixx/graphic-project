@@ -21,12 +21,15 @@ import { SketchPicker } from "react-color";
 [] * Create Drag and drop option 
 */
 
+const MAX_COLOR_DIFFRENCE = 15;
+
 export default function Canvas() {
   let myRef = React.createRef();
   const [myP5, setMyP5] = useState(null);
   const [proportionFactor, setProportionFactor] = useState(50);
   const [powerChange, setPowerChange] = useState(50);
   const [selectedColorStyle, setSelectedColorStyle] = useState("rgb(0, 0, 0)"); // For selected pixel color div
+  const [newSelectedColorStyle, setNewSelectedColorStyle] = useState(null);
 
   //State for new image loaded by user from input
   const [newImage, setNewImage] = useState(null);
@@ -54,18 +57,43 @@ export default function Canvas() {
     let size = { width: 0, height: 0 };
     //Store p5 canvas
     let canvas;
+    //Store pixels with similar color
+    let similarColorPixels = [];
 
     p.preload = () => {
       console.log("Preload, loading image...");
       //Loading image before setup function
       image = p.loadImage(newImage || "./test.jpg", () => {
-        // console.log(image);
+        console.log(image);
+        if (newSelectedColorStyle) {
+          // console.log(newSelectedColorStyle);
+          image.loadPixels();
+          let color2 = {
+            R: selectedColorStyle.rgb.R,
+            G: selectedColorStyle.rgb.G,
+            B: selectedColorStyle.rgb.B,
+          };
+          for (let i = 0; i < image.pixels.length; i += 4) {
+            // console.log(image.pixels[i]);
+            let R = image.pixels[i];
+            let G = image.pixels[i + 1];
+            let B = image.pixels[i + 2];
+
+            if (isSimilarColor({ R, G, B }, color2)) {
+              similarColorPixels.push(i);
+              image.pixels[i] = newSelectedColorStyle.rgb.r;
+              image.pixels[i + 1] = newSelectedColorStyle.rgb.g;
+              image.pixels[i + 2] = newSelectedColorStyle.rgb.b;
+            }
+          }
+          console.log(similarColorPixels);
+          image.updatePixels();
+        }
       });
-      // image.loadPixels();
     };
 
     p.setup = () => {
-      console.log("Setup...", image);
+      //console.log("Setup...", image);
       //Measure dimensions
       //Could be changed in final version of app
       dimension = p.min(p.windowWidth / 1.5, p.windowHeight / 1.5);
@@ -86,7 +114,6 @@ export default function Canvas() {
     p.draw = () => {
       //Set background
       p.background("rgb(100,100,100)");
-
       //Draw image
       if (image) {
         p.image(image, 0, 0, p.width, (image.height * p.width) / image.width);
@@ -128,13 +155,21 @@ export default function Canvas() {
       let R = image.pixels[4 * (imageX + imageY * image.width)];
       let G = image.pixels[4 * (imageX + imageY * image.width) + 1];
       let B = image.pixels[4 * (imageX + imageY * image.width) + 2];
-      selectedColor = numToRGBString(R, G, B);
+      selectedColor = { RGBstring: numToRGBString(R, G, B), rgb: { R, G, B } };
       setSelectedColorStyle(selectedColor);
     };
 
     //Converts R G B values to string 'rgb(R,G,B)'
     const numToRGBString = (R, G, B) => {
       return "rgb(" + R + "," + G + "," + B + ")";
+    };
+
+    const isSimilarColor = (color1, color2) => {
+      return (
+        Math.abs(color1.R - color2.R) <= MAX_COLOR_DIFFRENCE &&
+        Math.abs(color1.G - color2.G) <= MAX_COLOR_DIFFRENCE &&
+        Math.abs(color1.B - color2.B) <= MAX_COLOR_DIFFRENCE
+      );
     };
   };
 
@@ -170,11 +205,20 @@ export default function Canvas() {
   //And in preload function it loads new image
   useEffect(() => {
     if (myP5 && newImage) {
+      setNewSelectedColorStyle(null);
       myP5.remove();
       setMyP5(new p5(Sketch, myRef.current));
     }
     // console.log("newimage:", newImage);
   }, [newImage]);
+
+  useEffect(() => {
+    console.log("Change selected color! ", newSelectedColorStyle);
+    if (myP5) {
+      myP5.remove();
+      setMyP5(new p5(Sketch, myRef.current));
+    }
+  }, [newSelectedColorStyle]);
 
   useEffect(() => {
     //TODO: Change pixels based on those factors
@@ -185,8 +229,8 @@ export default function Canvas() {
       <div className="row h-100 picker">
         <div className="col-12 col-lg-3 picker__column">
           <SketchPicker
-            color={selectedColorStyle}
-            onChangeComplete={setSelectedColorStyle}
+            color={newSelectedColorStyle || selectedColorStyle.RGBstring}
+            onChangeComplete={setNewSelectedColorStyle}
           />
           <div className="picker__sliders">
             <label htmlFor="proportionFactor" className="form-label">
