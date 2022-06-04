@@ -135,6 +135,11 @@ export default function Canvas() {
         };
       }
     };
+    p.keyPressed = () => {
+      if (p.key === "s") {
+        p.save("korekty_barw.png");
+      }
+    };
 
     //Resize canvas on window resize
     p.windowResized = () => {
@@ -197,12 +202,11 @@ export default function Canvas() {
   };
 
   const saveImg = () => {
-    const link = document.createElement("a");
-    link.className = "file-saver";
-    link.download = "korekty_barwne";
-    link.href = myP5.canvas.toDataURL();
-    link.click();
-    link.remove();
+    window.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "s",
+      })
+    );
   };
 
   const onChangeImageFile = (e) => {
