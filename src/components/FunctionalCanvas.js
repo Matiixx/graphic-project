@@ -13,11 +13,11 @@ import { SketchPicker } from "react-color";
   [] Better calculate width and height of drawing image in canvas
 [] Detect all pixels with similar color
 [] Debounced color picker
-[] Change color of picked pixels and display it
+[+] Change color of picked pixels and display it
 [] Change other pixels' colors proportionaly to inversion of absolute value of diffrence between picked color and new color
 [] Change proportion with slider 
 [] Create slider of strength of mixing old image with new colors
-[] Save edited image (download to PC)
+[+] Save edited image (download to PC)
 [] * Create Drag and drop option 
 */
 
@@ -63,7 +63,7 @@ export default function Canvas() {
     p.preload = () => {
       console.log("Preload, loading image...");
       //Loading image before setup function
-      image = p.loadImage(newImage || "./test.jpg", () => {
+      image = p.loadImage(newImage || "./saul_goodman.jpeg", () => {
         console.log(image);
         if (newSelectedColorStyle) {
           // console.log(newSelectedColorStyle);
@@ -177,11 +177,21 @@ export default function Canvas() {
   useEffect(() => {
     if (myP5) myP5.remove();
     setMyP5(new p5(Sketch, myRef.current));
+    // eslint-disable-next-line
   }, []);
 
   //Opens hidden file input
   const onFileInputClick = () => {
     inputFile.current.click();
+  };
+
+  const saveImg = () => {
+    const link = document.createElement("a");
+    link.className = "file-saver";
+    link.download = "korekty_barwne";
+    link.href = myP5.canvas.toDataURL();
+    link.click();
+    link.remove();
   };
 
   const onChangeImageFile = (e) => {
@@ -209,7 +219,7 @@ export default function Canvas() {
       myP5.remove();
       setMyP5(new p5(Sketch, myRef.current));
     }
-    // console.log("newimage:", newImage);
+    // eslint-disable-next-line
   }, [newImage]);
 
   useEffect(() => {
@@ -218,6 +228,7 @@ export default function Canvas() {
       myP5.remove();
       setMyP5(new p5(Sketch, myRef.current));
     }
+    // eslint-disable-next-line
   }, [newSelectedColorStyle]);
 
   useEffect(() => {
@@ -267,9 +278,11 @@ export default function Canvas() {
           >
             Upload file
           </button>
+          <button className="btn btn-info text-light my-3" onClick={saveImg}>
+            Save file
+          </button>
         </div>
         <div className="col-12 col-lg-9 picker__column d-flex align-items-center">
-          {/* Real canvas div */}
           <div
             className="canvas-div"
             style={{
