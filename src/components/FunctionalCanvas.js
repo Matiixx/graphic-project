@@ -135,9 +135,11 @@ export default function Canvas() {
         };
       }
     };
+
     p.keyPressed = () => {
       if (p.key === "s") {
-        p.save("korekty_barw.png");
+        image.updatePixels();
+        image.save("korekty_barw", "png");
       }
     };
 
