@@ -21,13 +21,11 @@ import { SketchPicker } from "react-color";
 [] * Create Drag and drop option 
 */
 
-const MAX_COLOR_DIFFRENCE = 15;
-
 export default function Canvas() {
   let myRef = React.createRef();
   const [myP5, setMyP5] = useState(null);
   const [proportionFactor, setProportionFactor] = useState(50);
-  const [powerChange, setPowerChange] = useState(50);
+  const [powerChange, setPowerChange] = useState(100);
   const [selectedColorStyle, setSelectedColorStyle] = useState("rgb(0, 0, 0)"); // For selected pixel color div
   const [newSelectedColorStyle, setNewSelectedColorStyle] = useState(null);
 
@@ -81,9 +79,22 @@ export default function Canvas() {
 
             if (isSimilarColor({ R, G, B }, color2)) {
               similarColorPixels.push(i);
-              image.pixels[i] = newSelectedColorStyle.rgb.r;
-              image.pixels[i + 1] = newSelectedColorStyle.rgb.g;
-              image.pixels[i + 2] = newSelectedColorStyle.rgb.b;
+
+              image.pixels[i] =
+                ((newSelectedColorStyle.rgb.r - image.pixels[i]) *
+                  powerChange) /
+                  100 +
+                image.pixels[i];
+              image.pixels[i + 1] =
+                ((newSelectedColorStyle.rgb.g - image.pixels[i + 1]) *
+                  powerChange) /
+                  100 +
+                image.pixels[i + 1];
+              image.pixels[i + 2] =
+                ((newSelectedColorStyle.rgb.b - image.pixels[i + 2]) *
+                  powerChange) /
+                  100 +
+                image.pixels[i + 2];
             }
           }
           console.log(similarColorPixels);
@@ -166,9 +177,9 @@ export default function Canvas() {
 
     const isSimilarColor = (color1, color2) => {
       return (
-        Math.abs(color1.R - color2.R) <= MAX_COLOR_DIFFRENCE &&
-        Math.abs(color1.G - color2.G) <= MAX_COLOR_DIFFRENCE &&
-        Math.abs(color1.B - color2.B) <= MAX_COLOR_DIFFRENCE
+        Math.abs(color1.R - color2.R) <= proportionFactor &&
+        Math.abs(color1.G - color2.G) <= proportionFactor &&
+        Math.abs(color1.B - color2.B) <= proportionFactor
       );
     };
   };
@@ -229,11 +240,7 @@ export default function Canvas() {
       setMyP5(new p5(Sketch, myRef.current));
     }
     // eslint-disable-next-line
-  }, [newSelectedColorStyle]);
-
-  useEffect(() => {
-    //TODO: Change pixels based on those factors
-  }, [powerChange, proportionFactor]);
+  }, [newSelectedColorStyle, proportionFactor, powerChange]);
 
   return (
     <div className="container app">
