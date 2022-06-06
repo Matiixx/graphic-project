@@ -20,5 +20,7 @@ A simple application that allows you to manipulate the color of image pixels in 
 
 ### Authors 
 [Mateusz Cichostępski](https://github.com/Matiixx)
+
 [Jakób Wujcik](https://github.com/jacobwojcik)
+
 [Mikhail Lemiasheuski](https://github.com/albusDalbador)
