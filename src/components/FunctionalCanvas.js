@@ -11,14 +11,13 @@ import { SketchPicker } from "react-color";
 [+] Try open large images / with diffrent sizes
   [] Fix bug while open tall image
   [] Better calculate width and height of drawing image in canvas
-[] Detect all pixels with similar color
-[] Debounced color picker
+[+] Detect all pixels with same color
+[+] Debounced color picker
 [+] Change color of picked pixels and display it
-[] Change other pixels' colors proportionaly to inversion of absolute value of diffrence between picked color and new color
-[] Change proportion with slider 
-[] Create slider of strength of mixing old image with new colors
+[+] Change other pixels' colors proportionaly to inversion of absolute value of diffrence between picked color and new color
+[+] Change proportion with slider 
+[+] Create slider of strength of mixing old image with new colors
 [+] Save edited image (download to PC)
-[] * Create Drag and drop option 
 */
 
 export default function Canvas() {
@@ -61,7 +60,7 @@ export default function Canvas() {
     p.preload = () => {
       console.log("Preload, loading image...");
       //Loading image before setup function
-      image = p.loadImage(newImage || "./saul_goodman.jpeg", () => {
+      image = p.loadImage(newImage || "./baloons.jpeg", () => {
         console.log(image);
         if (newSelectedColorStyle) {
           // console.log(newSelectedColorStyle);
@@ -77,7 +76,7 @@ export default function Canvas() {
             let G = image.pixels[i + 1];
             let B = image.pixels[i + 2];
 
-            if (isSimilarColor({ R, G, B }, color2)) {
+            if (isEqualPixel({ R, G, B }, color2)) {
               similarColorPixels.push(i);
 
               image.pixels[i] =
@@ -95,6 +94,16 @@ export default function Canvas() {
                   powerChange) /
                   100 +
                 image.pixels[i + 2];
+            } else {
+              image.pixels[i] =
+                (image.pixels[i] * (100 - proportionFactor)) / 100 +
+                (newSelectedColorStyle.rgb.r * proportionFactor) / 100;
+              image.pixels[i + 1] =
+                (image.pixels[i + 1] * (100 - proportionFactor)) / 100 +
+                (newSelectedColorStyle.rgb.g * proportionFactor) / 100;
+              image.pixels[i + 2] =
+                (image.pixels[i + 2] * (100 - proportionFactor)) / 100 +
+                (newSelectedColorStyle.rgb.b * proportionFactor) / 100;
             }
           }
           console.log(similarColorPixels);
@@ -124,7 +133,7 @@ export default function Canvas() {
 
     p.draw = () => {
       //Set background
-      p.background("rgb(100,100,100)");
+      p.background("rgb(255,255,255)");
       //Draw image
       if (image) {
         p.image(image, 0, 0, p.width, (image.height * p.width) / image.width);
@@ -182,12 +191,8 @@ export default function Canvas() {
       return "rgb(" + R + "," + G + "," + B + ")";
     };
 
-    const isSimilarColor = (color1, color2) => {
-      return (
-        Math.abs(color1.R - color2.R) <= proportionFactor &&
-        Math.abs(color1.G - color2.G) <= proportionFactor &&
-        Math.abs(color1.B - color2.B) <= proportionFactor
-      );
+    const isEqualPixel = ({ R, G, B }, pixel) => {
+      return R === pixel.R && G === pixel.G && B === pixel.B;
     };
   };
 
@@ -241,10 +246,16 @@ export default function Canvas() {
 
   useEffect(() => {
     console.log("Change selected color! ", newSelectedColorStyle);
-    if (myP5) {
-      myP5.remove();
-      setMyP5(new p5(Sketch, myRef.current));
-    }
+    const timeoutID = setTimeout(() => {
+      if (myP5) {
+        myP5.remove();
+        setMyP5(new p5(Sketch, myRef.current));
+      }
+    }, 50);
+    return () => {
+      clearTimeout(timeoutID);
+    };
+
     // eslint-disable-next-line
   }, [newSelectedColorStyle, proportionFactor, powerChange]);
 
