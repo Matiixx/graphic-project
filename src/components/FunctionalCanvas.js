@@ -25,7 +25,7 @@ export default function Canvas() {
   const [myP5, setMyP5] = useState(null);
   const [proportionFactor, setProportionFactor] = useState(50);
   const [powerChange, setPowerChange] = useState(100);
-  const [selectedColorStyle, setSelectedColorStyle] = useState("rgb(0, 0, 0)"); // For selected pixel color div
+  const [selectedColorStyle, setSelectedColorStyle] = useState(null);
   const [newSelectedColorStyle, setNewSelectedColorStyle] = useState(null);
 
   //State for new image loaded by user from input
@@ -61,8 +61,8 @@ export default function Canvas() {
       console.log("Preload, loading image...");
       //Loading image before setup function
       image = p.loadImage(newImage || "./baloons.jpeg", () => {
-        console.log(image);
-        if (newSelectedColorStyle) {
+        console.log("selected pixel", selectedColorStyle);
+        if (newSelectedColorStyle && selectedColorStyle) {
           // console.log(newSelectedColorStyle);
           image.loadPixels();
           let color2 = {
@@ -106,7 +106,6 @@ export default function Canvas() {
                 (newSelectedColorStyle.rgb.b * proportionFactor) / 100;
             }
           }
-          console.log(similarColorPixels);
           image.updatePixels();
         }
       });
@@ -137,7 +136,7 @@ export default function Canvas() {
       //Draw image
       if (image) {
         p.image(image, 0, 0, p.width, (image.height * p.width) / image.width);
-        //Assign sizes of original image
+        //Assign sizes of image
         size = {
           width: parseInt(p.width),
           height: parseInt((image.height * p.width) / image.width),
@@ -165,6 +164,7 @@ export default function Canvas() {
         console.log("Click at [", e.layerX, e.layerY, "]");
         image.loadPixels();
         getColorFromPixel(image, e.layerX, e.layerY);
+        setNewSelectedColorStyle(null);
       }
     };
 
@@ -219,7 +219,6 @@ export default function Canvas() {
   const onChangeImageFile = (e) => {
     e.stopPropagation();
     e.preventDefault();
-    // console.log(e.target.files[0]);
     readNewImage(e.target.files[0]);
   };
 
@@ -230,6 +229,18 @@ export default function Canvas() {
       setNewImage(ev.target.result);
     };
     reader.readAsDataURL(file);
+  };
+
+  const resetImageHandle = async (e) => {
+    e.preventDefault();
+    if (myP5) {
+      setSelectedColorStyle(null);
+      setNewSelectedColorStyle(null);
+      setProportionFactor(50);
+      setPowerChange(100);
+      myP5.remove();
+      setMyP5(new p5(Sketch, myRef.current));
+    }
   };
 
   //Don't know what is better way to load new image into Sketch
@@ -246,16 +257,17 @@ export default function Canvas() {
 
   useEffect(() => {
     console.log("Change selected color! ", newSelectedColorStyle);
-    const timeoutID = setTimeout(() => {
-      if (myP5) {
-        myP5.remove();
-        setMyP5(new p5(Sketch, myRef.current));
-      }
-    }, 50);
-    return () => {
-      clearTimeout(timeoutID);
-    };
-
+    if (selectedColorStyle) {
+      const timeoutID = setTimeout(() => {
+        if (myP5) {
+          myP5.remove();
+          setMyP5(new p5(Sketch, myRef.current));
+        }
+      }, 50);
+      return () => {
+        clearTimeout(timeoutID);
+      };
+    }
     // eslint-disable-next-line
   }, [newSelectedColorStyle, proportionFactor, powerChange]);
 
@@ -264,7 +276,11 @@ export default function Canvas() {
       <div className="row h-100 picker">
         <div className="col-12 col-lg-3 picker__column">
           <SketchPicker
-            color={newSelectedColorStyle || selectedColorStyle.RGBstring}
+            color={
+              newSelectedColorStyle ||
+              selectedColorStyle?.RGBstring ||
+              "rgb(0,0,0)"
+            }
             onChangeComplete={setNewSelectedColorStyle}
           />
           <div className="picker__sliders">
@@ -298,12 +314,23 @@ export default function Canvas() {
           />
           <button
             className="btn btn-info text-light"
+            style={{ fontWeight: "bold" }}
             onClick={onFileInputClick}
           >
             Upload file
           </button>
-          <button className="btn btn-info text-light my-3" onClick={saveImg}>
+          <button
+            className="btn btn-info text-light my-3 font-weight-bold"
+            style={{ fontWeight: "bold" }}
+            onClick={saveImg}
+          >
             Save file
+          </button>
+          <button
+            className="btn btn-danger text-light my-3"
+            onClick={resetImageHandle}
+          >
+            Reset image
           </button>
         </div>
         <div className="col-12 col-lg-9 picker__column d-flex align-items-center">
