@@ -132,6 +132,7 @@ export default function Canvas() {
     };
 
     p.draw = () => {
+      p.frameRate(60);
       //Set background
       p.background("rgb(255,255,255)");
       //Draw image
