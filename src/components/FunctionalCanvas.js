@@ -113,6 +113,7 @@ export default function Canvas() {
 
     p.setup = () => {
       //console.log("Setup...", image);
+      console.log(myP5);
       //Measure dimensions
       //Could be changed in final version of app
       dimension = p.min(p.windowWidth / 1.5, p.windowHeight / 1.5);
@@ -233,14 +234,10 @@ export default function Canvas() {
 
   const resetImageHandle = async (e) => {
     e.preventDefault();
-    if (myP5) {
-      setSelectedColorStyle(null);
-      setNewSelectedColorStyle(null);
-      setProportionFactor(50);
-      setPowerChange(100);
-      myP5.remove();
-      setMyP5(new p5(Sketch, myRef.current));
-    }
+    setNewSelectedColorStyle(null);
+    setProportionFactor(50);
+    setPowerChange(100);
+    // setSelectedColorStyle(null);
   };
 
   //Don't know what is better way to load new image into Sketch
