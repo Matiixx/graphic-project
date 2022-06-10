@@ -54,8 +54,6 @@ export default function Canvas() {
     let size = { width: 0, height: 0 };
     //Store p5 canvas
     let canvas;
-    //Store pixels with similar color
-    let similarColorPixels = [];
 
     p.preload = () => {
       console.log("Preload, loading image...");
@@ -63,7 +61,6 @@ export default function Canvas() {
       image = p.loadImage(newImage || "./baloons.jpeg", () => {
         console.log("selected pixel", selectedColorStyle);
         if (newSelectedColorStyle && selectedColorStyle) {
-          // console.log(newSelectedColorStyle);
           image.loadPixels();
           let color2 = {
             R: selectedColorStyle.rgb.R,
@@ -71,14 +68,11 @@ export default function Canvas() {
             B: selectedColorStyle.rgb.B,
           };
           for (let i = 0; i < image.pixels.length; i += 4) {
-            // console.log(image.pixels[i]);
             let R = image.pixels[i];
             let G = image.pixels[i + 1];
             let B = image.pixels[i + 2];
 
-            if (isEqualPixel({ R, G, B }, color2)) {
-              similarColorPixels.push(i);
-
+            if (isSimilarPixel({ R, G, B }, color2, proportionFactor)) {
               image.pixels[i] =
                 ((newSelectedColorStyle.rgb.r - image.pixels[i]) *
                   powerChange) /
@@ -94,16 +88,6 @@ export default function Canvas() {
                   powerChange) /
                   100 +
                 image.pixels[i + 2];
-            } else {
-              image.pixels[i] =
-                (image.pixels[i] * (100 - proportionFactor)) / 100 +
-                (newSelectedColorStyle.rgb.r * proportionFactor) / 100;
-              image.pixels[i + 1] =
-                (image.pixels[i + 1] * (100 - proportionFactor)) / 100 +
-                (newSelectedColorStyle.rgb.g * proportionFactor) / 100;
-              image.pixels[i + 2] =
-                (image.pixels[i + 2] * (100 - proportionFactor)) / 100 +
-                (newSelectedColorStyle.rgb.b * proportionFactor) / 100;
             }
           }
           image.updatePixels();
@@ -133,9 +117,7 @@ export default function Canvas() {
 
     p.draw = () => {
       p.frameRate(60);
-      //Set background
       p.background("rgb(255,255,255)");
-      //Draw image
       if (image) {
         p.image(image, 0, 0, p.width, (image.height * p.width) / image.width);
         //Assign sizes of image
@@ -163,7 +145,7 @@ export default function Canvas() {
     p.handleClick = (e) => {
       //Check if click was inside image
       if (clickInImage(size, e.layerX, e.layerY)) {
-        console.log("Click at [", e.layerX, e.layerY, "]");
+        // console.log("Click at [", e.layerX, e.layerY, "]");
         image.loadPixels();
         getColorFromPixel(image, e.layerX, e.layerY);
         setNewSelectedColorStyle(null);
@@ -180,7 +162,6 @@ export default function Canvas() {
     const getColorFromPixel = (image, x, y) => {
       let imageX = parseInt(p.map(x, 0, size.width, 0, image.width));
       let imageY = parseInt(p.map(y, 0, size.height, 0, image.height));
-      console.log(imageX, imageY);
       let R = image.pixels[4 * (imageX + imageY * image.width)];
       let G = image.pixels[4 * (imageX + imageY * image.width) + 1];
       let B = image.pixels[4 * (imageX + imageY * image.width) + 2];
@@ -193,8 +174,12 @@ export default function Canvas() {
       return "rgb(" + R + "," + G + "," + B + ")";
     };
 
-    const isEqualPixel = ({ R, G, B }, pixel) => {
-      return R === pixel.R && G === pixel.G && B === pixel.B;
+    const isSimilarPixel = ({ R, G, B }, pixel, max_diffrence) => {
+      return (
+        Math.abs(R - pixel.R) <= max_diffrence &&
+        Math.abs(G - pixel.G) <= max_diffrence &&
+        Math.abs(B - pixel.B) <= max_diffrence
+      );
     };
   };
 
@@ -254,7 +239,6 @@ export default function Canvas() {
   }, [newImage]);
 
   useEffect(() => {
-    console.log("Change selected color! ", newSelectedColorStyle);
     if (selectedColorStyle) {
       const timeoutID = setTimeout(() => {
         if (myP5) {
