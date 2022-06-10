@@ -56,10 +56,8 @@ export default function Canvas() {
     let canvas;
 
     p.preload = () => {
-      console.log("Preload, loading image...");
       //Loading image before setup function
       image = p.loadImage(newImage || "./baloons.jpeg", () => {
-        console.log("selected pixel", selectedColorStyle);
         if (newSelectedColorStyle && selectedColorStyle) {
           image.loadPixels();
           let color2 = {
@@ -96,8 +94,6 @@ export default function Canvas() {
     };
 
     p.setup = () => {
-      //console.log("Setup...", image);
-      console.log(myP5);
       //Measure dimensions
       //Could be changed in final version of app
       dimension = p.min(p.windowWidth / 1.5, p.windowHeight / 1.5);
@@ -145,7 +141,6 @@ export default function Canvas() {
     p.handleClick = (e) => {
       //Check if click was inside image
       if (clickInImage(size, e.layerX, e.layerY)) {
-        // console.log("Click at [", e.layerX, e.layerY, "]");
         image.loadPixels();
         getColorFromPixel(image, e.layerX, e.layerY);
         setNewSelectedColorStyle(null);
