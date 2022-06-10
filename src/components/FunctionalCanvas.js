@@ -240,7 +240,7 @@ export default function Canvas() {
           myP5.remove();
           setMyP5(new p5(Sketch, myRef.current));
         }
-      }, 50);
+      }, 100);
       return () => {
         clearTimeout(timeoutID);
       };
