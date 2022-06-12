@@ -24,7 +24,7 @@ export default function Canvas() {
   let myRef = React.createRef();
   const [myP5, setMyP5] = useState(null);
   const [proportionFactor, setProportionFactor] = useState(50);
-  const [powerChange, setAlphaChannelFactor] = useState(100);
+  const [powerChange, setPowerChange] = useState(100);
   const [selectedColorStyle, setSelectedColorStyle] = useState(null);
   const [newSelectedColorStyle, setNewSelectedColorStyle] = useState(null);
 
@@ -35,8 +35,8 @@ export default function Canvas() {
     setProportionFactor(e.target.value);
   };
 
-  const changeAlphaChannelFactor = (e) => {
-    setAlphaChannelFactor(e.target.value);
+  const changePowerChange = (e) => {
+    setPowerChange(e.target.value);
   };
 
   //Ref for hidden input form
@@ -217,7 +217,7 @@ export default function Canvas() {
     e.preventDefault();
     setNewSelectedColorStyle(null);
     setProportionFactor(50);
-    setAlphaChannelFactor(100);
+    setPowerChange(100);
     // setSelectedColorStyle(null);
   };
 
@@ -279,7 +279,7 @@ export default function Canvas() {
               className="form-range"
               id="changePower"
               value={powerChange}
-              onChange={changeAlphaChannelFactor}
+              onChange={changePowerChange}
             />
           </div>
           <input
