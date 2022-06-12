@@ -16,10 +16,6 @@
         align-items: center;
     }
 
-    // &__pickers{
-    //     display: flex;
-    // }
-
     &__picker-info{
         padding: 0.5em;
     }
@@ -32,7 +28,7 @@
     }
 
     &__sliders{
-        margin: 2em 0;
+        margin-top: 2em;
     }
 
     .btn-info{
@@ -41,21 +37,15 @@
 
 }
 .canvas-div{
-
-    //@media(min-width: 992px){
-        display: flex;
-        justify-content: center;
-        height: 100%;
-        align-items: center;
-    //}
-}
-
-.slider-picker{
-    // div:nth-child(2){
-    //     display: none;
-    // }
-
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    align-items: center;
 }
 .slider-picker > div:nth-child(2){
     display: none;
+}
+
+.picker__pickers > div:nth-child(2) > div > div:nth-child(4){
+    display:none !important;
 }
