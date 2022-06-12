@@ -3,11 +3,25 @@
 }
 .picker{
     min-height: 100vh;
+
+    &__title{
+        font-size: 18px;
+        font-weight: 600;
+    }
+
     &__column{
         display: flex;
         flex-flow: column;
         justify-content: center;
         align-items: center;
+    }
+
+    // &__pickers{
+    //     display: flex;
+    // }
+
+    &__picker-info{
+        padding: 0.5em;
     }
 
     &__selected-color{
@@ -21,6 +35,10 @@
         margin: 2em 0;
     }
 
+    .btn-info{
+        width: 130px;
+    }
+
 }
 .canvas-div{
 
@@ -30,4 +48,14 @@
         height: 100%;
         align-items: center;
     //}
+}
+
+.slider-picker{
+    // div:nth-child(2){
+    //     display: none;
+    // }
+
+}
+.slider-picker > div:nth-child(2){
+    display: none;
 }
